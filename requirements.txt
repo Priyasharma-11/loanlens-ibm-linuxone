@@ -1,0 +1,8 @@
+# Core (needed for model, API, CLI, tests) - all have s390x wheels on recent PyPI; otherwise use distro packages
+numpy>=1.24
+pandas>=2.0
+scikit-learn>=1.2
+joblib>=1.2
+# UI only (optional on LinuxONE: pyarrow, a streamlit dependency, may need a source build on s390x).
+# Fallback: run the API on LinuxONE and the UI on your laptop with LOANLENS_API_URL.
+streamlit>=1.30

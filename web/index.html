@@ -1,0 +1,678 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LoanLens | Credit Intelligence</title>
+<style>
+:root{font-family:Inter,system-ui,-apple-system,sans-serif;color:#e8edf7;background:#0b1020}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh}
+.layout{display:grid;grid-template-columns:235px 1fr;min-height:100vh}
+aside{background:#10182b;border-right:1px solid #26324a;padding:25px 16px}
+.brand{display:flex;align-items:center;gap:12px;margin:0 0 35px;padding:0 9px}
+.logo{width:39px;height:39px;border-radius:13px;background:#79e3bd;color:#09251d;display:grid;place-items:center;font-weight:900;font-size:21px}
+.brand h1{font-size:18px;margin:0}.brand p{margin:3px 0;color:#94a3b8;font-size:11px}
+.navlabel{color:#8493ab;font-size:10px;letter-spacing:1.7px;padding:0 10px;margin:20px 0 10px}
+nav button{display:flex;width:100%;gap:12px;align-items:center;text-align:left;border:0;background:transparent;color:#aab7ce;padding:13px 12px;margin:4px 0;border-radius:10px;cursor:pointer;font-size:13px}
+nav button.active,nav button:hover{background:#20334a;color:#8cf0c8}
+.sidebar-foot{font-size:11px;color:#8190a8;line-height:1.8;margin:35px 8px 0}
+main{min-width:0;padding:30px clamp(18px,4vw,52px);max-width:1500px;width:100%;margin:auto}
+.top{display:flex;justify-content:space-between;align-items:center;gap:15px;flex-wrap:wrap}
+.eyebrow{color:#81e7c0;text-transform:uppercase;font-size:10px;letter-spacing:2px;font-weight:700}
+h2{font-size:29px;margin:8px 0;font-weight:700;letter-spacing:-.7px}
+.sub{color:#9baac1;font-size:13px;line-height:1.7;margin:0}
+.status{border:1px solid #34435b;border-radius:30px;padding:9px 13px;font-size:12px;color:#c3d0e3;display:flex;gap:8px;align-items:center}
+.dot{width:8px;height:8px;border-radius:50%;background:#f6bc60}
+.dot.ok{background:#66e6b1}
+.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:15px;margin:27px 0}
+.card{background:#131d31;border:1px solid #293650;border-radius:16px;padding:21px;min-width:0}
+.kicker{color:#9aa9c0;font-size:12px}
+.metric{font-size:26px;font-weight:750;margin:14px 0 6px;overflow-wrap:anywhere}
+.hint{color:#8c9bb3;font-size:11px;line-height:1.6}
+.panel{background:#131d31;border:1px solid #293650;border-radius:16px;padding:25px;margin:18px 0}
+.panel h3{font-size:17px;margin:0 0 7px}
+.panel p{color:#9baac1;font-size:13px;line-height:1.7}
+.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:20px}
+button.primary,.btn{background:#83e8c0;color:#0a2a20;border:0;padding:12px 17px;border-radius:9px;font-weight:750;cursor:pointer;font-size:12px}
+button.secondary,.btn.secondary{background:#202c42;color:#e0e8f5;border:1px solid #3b4961}
+button:disabled{opacity:.5;cursor:not-allowed}
+.page{display:none}.page.active{display:block}
+.notice{background:#2b271d;border:1px solid #655238;color:#f1d6a0;border-radius:12px;padding:14px 16px;font-size:12px;line-height:1.7;margin:22px 0}
+.result{white-space:pre-wrap;overflow-wrap:anywhere;background:#0b1222;border:1px solid #293650;border-radius:10px;padding:15px;color:#c6f8df;font:12px/1.7 ui-monospace,monospace;max-height:440px;overflow:auto}
+label{display:block;font-size:12px;color:#bac7dc;margin:13px 0 6px}
+input,select,textarea{width:100%;background:#0b1426;border:1px solid #36445e;border-radius:8px;padding:11px;color:#eaf0fa;font:13px inherit}
+.formgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 15px}
+.sectiontitle{font-size:12px;color:#80e6bf;letter-spacing:1px;text-transform:uppercase;margin:25px 0 8px}
+footer{font-size:11px;color:#75849c;margin:30px 0;line-height:1.8}
+@media(max-width:760px){.layout{grid-template-columns:1fr}aside{padding:14px}.brand{margin:0 0 12px}nav{display:flex;overflow-x:auto;gap:4px}nav button{white-space:nowrap;width:auto}.navlabel,.sidebar-foot{display:none}main{padding:22px 15px}.grid{grid-template-columns:1fr}.formgrid{grid-template-columns:1fr}h2{font-size:25px}}
+
+/* Readable What-if comparison */
+.whatif-report{font-family:Inter,system-ui,sans-serif;color:#e8edf7;font-size:13px;line-height:1.65}
+.whatif-report h4{margin:22px 0 10px;font-size:15px}
+.whatif-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:15px 0}
+.whatif-card{background:#131d31;border:1px solid #34435b;border-radius:12px;padding:16px;min-width:0}
+.whatif-label,.whatif-sub{color:#9baac1;font-size:12px}
+.whatif-value{font-size:25px;font-weight:750;margin:8px 0;overflow-wrap:anywhere}
+.whatif-note{background:#172b2a;border:1px solid #35675b;border-radius:10px;padding:14px;margin-bottom:14px}
+.whatif-table-wrap{overflow-x:auto}
+.whatif-table{width:100%;border-collapse:collapse;font-size:12px}
+.whatif-table th,.whatif-table td{padding:11px 10px;border-bottom:1px solid #293650;text-align:left;white-space:nowrap}
+.whatif-table th{color:#8ce8c4;background:#111a2c}
+.whatif-table td{color:#dce6f5}
+.whatif-disclaimer{font-size:12px;color:#f1d6a0;background:#2b271d;border:1px solid #655238;border-radius:10px;padding:13px}
+.whatif-raw{white-space:pre-wrap;overflow-wrap:anywhere;max-height:400px;overflow:auto;background:#0b1222;padding:12px;border-radius:8px;font:12px/1.6 ui-monospace,monospace}
+@media(max-width:760px){.whatif-grid{grid-template-columns:1fr}.whatif-table{font-size:11px}}
+
+
+/* Readable assessment report */
+.assess-report{font-family:Inter,system-ui,sans-serif;color:#e8edf7;font-size:13px;line-height:1.65;white-space:normal}
+.assess-report h4{font-size:15px;margin:20px 0 10px}
+.assess-cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:14px 0}
+.assess-card{background:#131d31;border:1px solid #34435b;border-radius:12px;padding:15px;min-width:0}
+.assess-label{color:#9baac1;font-size:12px}
+.assess-value{font-size:23px;font-weight:750;margin:6px 0;overflow-wrap:anywhere}
+.assess-sub{font-size:12px;color:#b6c5d9}
+.assess-table-wrap{overflow-x:auto}
+.assess-table{width:100%;border-collapse:collapse;font-size:12px}
+.assess-table th,.assess-table td{padding:10px;border-bottom:1px solid #293650;text-align:left}
+.assess-table th{color:#8ce8c4}
+.assess-explanation{background:#131d31;border:1px solid #34435b;border-radius:10px;padding:14px;white-space:normal}
+
+.risk-factor-list{list-style:none;padding:0;margin:12px 0 0}
+.risk-factor-list li{padding:12px 0;border-top:1px solid #293650;line-height:1.5}
+.risk-factor-list li:first-child{border-top:0}
+.risk-factor-list li strong{color:#f1f5fb}
+.risk-factor-list .assess-sub{display:block;margin-top:4px}
+
+.assess-report details{margin-top:16px}
+.assess-report summary{cursor:pointer;color:#8ce8c4}
+.assess-raw{white-space:pre-wrap;overflow-wrap:anywhere;max-height:420px;overflow:auto;background:#0b1222;padding:12px;border-radius:8px;font:12px/1.6 ui-monospace,monospace}
+@media(max-width:760px){.assess-cards{grid-template-columns:1fr}.assess-value{font-size:21px}}
+
+
+/* Readable application history */
+.history-report{font-family:Inter,system-ui,sans-serif;color:#e8edf7;font-size:13px;line-height:1.65;white-space:normal}
+.history-report h4{font-size:15px;margin:20px 0 10px}
+.history-cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:14px 0}
+.history-card{background:#131d31;border:1px solid #34435b;border-radius:12px;padding:15px;min-width:0}
+.history-label{color:#9baac1;font-size:12px}
+.history-value{font-size:21px;font-weight:750;margin:6px 0;overflow-wrap:anywhere}
+.history-table-wrap{overflow-x:auto}
+.history-table{width:100%;border-collapse:collapse;font-size:12px}
+.history-table th,.history-table td{padding:10px;border-bottom:1px solid #293650;text-align:left}
+.history-table th{color:#8ce8c4}
+.history-report details{margin-top:16px}
+.history-report summary{cursor:pointer;color:#8ce8c4}
+.history-raw{white-space:pre-wrap;overflow-wrap:anywhere;max-height:420px;overflow:auto;background:#0b1222;padding:12px;border-radius:8px;font:12px/1.6 ui-monospace,monospace}
+@media(max-width:760px){.history-cards{grid-template-columns:1fr}}
+
+
+/* Readable Overview status */
+.overview-report{font-family:Inter,system-ui,sans-serif;color:#e8edf7;font-size:13px;line-height:1.65;white-space:normal}
+.overview-status{display:flex;align-items:center;gap:10px;background:#132a26;border:1px solid #35675b;border-radius:10px;padding:13px;margin:12px 0}
+.overview-status.offline{background:#302020;border-color:#754747}
+.overview-status-dot{width:10px;height:10px;border-radius:50%;background:#61dfad;flex:none}
+.overview-status.offline .overview-status-dot{background:#ff8888}
+.overview-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:14px 0}
+.overview-item{background:#131d31;border:1px solid #34435b;border-radius:10px;padding:13px;min-width:0}
+.overview-label{color:#9baac1;font-size:12px}
+.overview-value{font-size:16px;font-weight:700;margin-top:5px;overflow-wrap:anywhere}
+.overview-report details{margin-top:16px}
+.overview-report summary{cursor:pointer;color:#8ce8c4}
+.overview-raw{white-space:pre-wrap;overflow-wrap:anywhere;max-height:360px;overflow:auto;background:#0b1222;padding:12px;border-radius:8px;font:12px/1.6 ui-monospace,monospace}
+@media(max-width:760px){.overview-grid{grid-template-columns:1fr}}
+
+
+/* Readable Reviewer and Audit */
+.reviewer-report{font-family:Inter,system-ui,sans-serif;color:#e8edf7;font-size:13px;line-height:1.65;white-space:normal}
+.reviewer-banner{padding:13px;border:1px solid #34435b;background:#131d31;border-radius:10px;margin:10px 0 14px}
+.reviewer-banner.good{border-color:#35675b;background:#132a26}
+.reviewer-banner.warn{border-color:#755c35;background:#2b271d}
+.reviewer-banner.bad{border-color:#754747;background:#302020}
+.reviewer-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:12px 0}
+.reviewer-item{background:#131d31;border:1px solid #34435b;border-radius:9px;padding:12px;min-width:0}
+.reviewer-label{font-size:12px;color:#9baac1}
+.reviewer-value{font-weight:700;margin-top:5px;overflow-wrap:anywhere}
+.reviewer-table-wrap{overflow-x:auto}
+.reviewer-table{width:100%;border-collapse:collapse;font-size:12px}
+.reviewer-table th,.reviewer-table td{padding:10px;border-bottom:1px solid #293650;text-align:left;vertical-align:top}
+.reviewer-table th{color:#8ce8c4}
+.reviewer-report details{margin-top:15px}
+.reviewer-report summary{cursor:pointer;color:#8ce8c4}
+.reviewer-raw{white-space:pre-wrap;overflow-wrap:anywhere;max-height:400px;overflow:auto;background:#0b1222;padding:12px;border-radius:8px;font:12px/1.6 ui-monospace,monospace}
+@media(max-width:760px){.reviewer-grid{grid-template-columns:1fr}}
+
+</style>
+</head>
+<body>
+<div class="layout">
+<aside>
+  <div class="brand"><div class="logo">L</div><div><h1>LoanLens</h1><p>CREDIT INTELLIGENCE</p></div></div>
+  <div class="navlabel">WORKSPACE</div>
+  <nav id="nav">
+    <button class="active" data-page="overview">◈ &nbsp; Overview</button>
+    <button data-page="assess">◎ &nbsp; Assess application</button>
+    <button data-page="whatif">↗ &nbsp; What-if analysis</button>
+    <button data-page="history">◷ &nbsp; Application history</button>
+    <button data-page="review">◇ &nbsp; Reviewer &amp; audit</button>
+    <button data-page="model">▦ &nbsp; Model &amp; system</button>
+  </nav>
+  <div class="sidebar-foot">RUNNING ON IBM LINUXONE<br>Prototype • Decision support only</div>
+</aside>
+<main>
+  <div class="top">
+    <div><div class="eyebrow">LOANLENS / LINUXONE</div><h2 id="pageTitle">Overview</h2><p class="sub" id="pageSub">A transparent workspace for illustrative credit-risk analysis.</p></div>
+    <div class="status"><span class="dot" id="healthDot"></span><span id="healthText">Checking API…</span></div>
+  </div>
+
+  <section class="page active" id="overview">
+    <div class="grid">
+      <div class="card"><div class="kicker">Backend status</div><div class="metric" id="metricHealth">Checking</div><div class="hint">LinuxONE API · localhost:8000</div></div>
+      <div class="card"><div class="kicker">Model version</div><div class="metric" id="metricModel">—</div><div class="hint">Loaded from the running API</div></div>
+      <div class="card"><div class="kicker">Assessments recorded</div><div class="metric" id="metricCount">—</div><div class="hint">Recorded inference snapshots</div></div>
+    </div>
+    <div class="panel"><div class="eyebrow">START HERE</div><h3 style="margin-top:12px">Explore an application</h3><p>Enter the model inputs and INR affordability details, validate the information, and inspect the illustrative model output.</p><div class="actions"><button class="primary" data-go="assess">Assess an application →</button><button class="secondary" data-go="model">View model details</button></div></div>
+    <div class="notice"><strong>Important:</strong> This is a prototype trained on public/synthetic data. Its output is not a lender's decision, a real credit score, or financial advice. Never use it as the sole basis for a real lending decision.</div>
+    <div class="panel"><h3>System response</h3><p>Live response from your LinuxONE-hosted API.</p><div class="result" id="homeResult">Waiting for health check…</div><button class="secondary" id="refresh" style="margin-top:12px">Refresh system status</button></div>
+  </section>
+
+  <section class="page" id="assess">
+    <div class="panel"><h3>Application assessment</h3><p>Fill in every field. Use illustrative/demo information only; do not enter real customer personal or financial data.</p>
+      <form id="assessForm">
+      <div class="sectiontitle">Historical model inputs · German Credit dataset</div><p class="hint">These fields use categories and units from an older public dataset. They are not calibrated for Indian lending. Age is used for the eligibility check only; it is excluded from the model features.</p><div class="formgrid">
+      <div><label>Loan duration (months)</label><input name="duration_months" type="number" min="1" max="72" value="12" required></div>
+      <div><label>Credit amount (historical dataset units)</label><input name="credit_amount" type="number" min="1" max="250000" value="1000" required></div>
+      <div><label>Installment rate (1–4)</label><input name="installment_rate" type="number" min="1" max="4" value="2" required></div>
+      <div><label>Existing credits</label><input name="existing_credits" type="number" min="0" max="10" value="1" required></div>
+      <div><label>Checking account status</label><select name="checking_status"><option value="lt_0">Negative balance</option><option value="0_to_200" selected>Balance 0–200</option><option value="ge_200">Balance 200+</option><option value="no_account">No checking account</option></select></div>
+      <div><label>Credit history</label><select name="credit_history"><option value="none_or_all_paid">No credits / all paid</option><option value="all_paid_this_bank">All paid at this bank</option><option value="existing_paid_duly" selected>Existing credits paid duly</option><option value="past_delays">Past payment delays</option><option value="critical_other_credits">Critical / credits elsewhere</option></select></div>
+      <div><label>Savings status</label><select name="savings_status"><option value="lt_100">Under 100</option><option value="100_to_500" selected>100–500</option><option value="500_to_1000">500–1000</option><option value="ge_1000">1000+</option><option value="unknown_none">Unknown / none</option></select></div>
+      <div><label>Employment duration</label><select name="employment_since"><option value="unemployed">Unemployed</option><option value="lt_1y">Under 1 year</option><option value="1_to_4y" selected>1–4 years</option><option value="4_to_7y">4–7 years</option><option value="ge_7y">7+ years</option></select></div>
+      <div><label>Housing</label><select name="housing"><option value="rent">Renting</option><option value="own" selected>Owns home</option><option value="free">Lives free</option></select></div>
+      <div><label>Property</label><select name="property"><option value="real_estate">Real estate</option><option value="life_insurance">Life insurance / savings agreement</option><option value="car_other" selected>Car / other</option><option value="none">None / unknown</option></select></div>
+      <div><label>Age (eligibility check only)</label><input name="age" type="number" min="18" max="100" value="30" required></div>
+      </div>
+      <div class="sectiontitle">Affordability simulator · INR</div><div class="formgrid">
+      <div><label>Monthly income (₹)</label><input name="monthly_income" type="number" min="1" value="60000" required></div>
+      <div><label>Existing monthly EMI (₹)</label><input name="existing_emi" type="number" min="0" value="10000" required></div>
+      <div><label>Requested loan (₹)</label><input name="loan_inr" type="number" min="1" value="300000" required></div>
+      <div><label>Interest rate (% per year)</label><input name="rate_pct" type="number" min="0" max="60" step="0.1" value="12" required></div>
+      <div><label>Tenure (months)</label><input name="tenure_months" type="number" min="1" max="360" value="36" required></div>
+      </div>
+      <div class="actions"><button class="primary" type="submit">Run assessment</button><button class="secondary" type="reset">Reset form</button></div>
+      </form>
+    </div>
+    <div class="panel"><h3>Assessment result</h3><p id="assessSummary">Submit the form to see validation, risk, and explanation output.</p><div class="result" id="assessResult">No assessment run yet.</div></div>
+  </section>
+
+  <section class="page" id="whatif">
+    <div class="panel"><h3>Hypothetical comparison</h3><p>Paste an application ID from a successful assessment, then enter a replacement value for one supported field. The official record will remain unchanged.</p>
+      <label>Application ID</label><input id="whatifId" placeholder="Example: 12-character application ID">
+      <label>Field to change</label><select id="whatifField"><option value="monthly_income">Monthly income (INR)</option><option value="existing_emi">Existing EMI (INR)</option><option value="loan_inr">Requested loan (INR)</option><option value="rate_pct">Interest rate (%)</option><option value="tenure_months">Tenure (months)</option><option value="duration_months">Loan duration (dataset units)</option><option value="credit_amount">Credit amount (dataset units)</option></select>
+      <label>New value</label><input id="whatifValue" type="number" value="75000">
+      <div class="actions"><button class="primary" id="runWhatif">Compare scenario</button></div>
+    </div><div class="panel"><h3>Comparison output</h3><div class="result" id="whatifResult">No comparison run yet.</div></div>
+  </section>
+
+  <section class="page" id="history">
+    <div class="panel"><h3>Application history</h3><p>Look up snapshots and correction requests by application ID.</p><label>Application ID</label><input id="historyId" placeholder="Enter application ID"><div class="actions"><button class="primary" id="loadHistory">Load history</button></div></div>
+    <div class="panel"><h3>History output</h3><div class="result" id="historyResult">No history loaded.</div></div>
+  </section>
+
+  <section class="page" id="review">
+    <div class="notice">Reviewer endpoints are protected by your reviewer token. Use only a strong secret and keep it private. Do not expose this prototype's reviewer interface publicly without additional authentication and security controls.</div>
+    <div class="panel"><h3>Reviewer access</h3><label>Reviewer token</label><input id="reviewToken" type="password" autocomplete="off" placeholder="Enter configured reviewer token"><div class="actions"><button class="primary" id="loadPending">Load pending corrections</button><button class="secondary" id="loadAudit">Load audit log</button><button class="secondary" id="verifyAudit">Verify audit chain</button></div></div>
+    <div class="panel"><h3>Reviewer output</h3><div class="result" id="reviewResult">No reviewer request made.</div></div>
+    <div class="panel"><h3>Review a correction</h3><label>Correction ID</label><input id="correctionId" type="number" min="1" placeholder="Correction ID"><label>Decision</label><select id="reviewDecision"><option value="VERIFIED">Verify</option><option value="REJECTED">Reject</option></select><label>Reviewer label</label><input id="reviewerName" value="reviewer"><label>Review note</label><textarea id="reviewNote" rows="2" placeholder="Reason for decision"></textarea><div class="actions"><button class="primary" id="submitReview">Submit review</button></div></div>
+  </section>
+
+  <section class="page" id="model">
+    <div class="grid">
+      <div class="card"><div class="kicker">Runtime architecture</div><div class="metric">s390x</div><div class="hint">IBM LinuxONE / Linux</div></div>
+      <div class="card"><div class="kicker">API health</div><div class="metric" id="modelHealth">—</div><div class="hint">Checked directly from the API</div></div>
+      <div class="card"><div class="kicker">Model version</div><div class="metric" id="modelVersion">—</div><div class="hint">Loaded model artifact</div></div>
+    </div>
+    <div class="panel"><h3>Model metadata and metrics</h3><p>Metadata reported by the deployed backend. Performance metrics depend on the dataset and evaluation setup.</p><div class="result" id="modelResult">Loading model metadata…</div><div class="actions"><button class="primary" id="refreshModel">Refresh model details</button></div></div>
+  </section>
+
+  <footer>LoanLens · LinuxONE deployment · Prototype only · Use synthetic/demo data. Never enter real customer personal or financial information into this demonstration.</footer>
+</main>
+</div>
+<script>
+const $ = id => document.getElementById(id);
+const pageInfo = {
+ overview:["Overview","A transparent workspace for illustrative credit-risk analysis."],
+ assess:["Assess application","Validate an application and inspect model output."],
+ whatif:["What-if analysis","Compare hypothetical values without changing the official record."],
+ history:["Application history","Inspect saved snapshots and correction records."],
+ review:["Reviewer & audit","Review pending corrections and verify audit integrity."],
+ model:["Model & system","Inspect the model metadata and LinuxONE runtime."]
+};
+function showPage(id){
+ document.querySelectorAll(".page").forEach(p=>p.classList.toggle("active",p.id===id));
+ document.querySelectorAll("nav button").forEach(b=>b.classList.toggle("active",b.dataset.page===id));
+ $("pageTitle").textContent=pageInfo[id][0]; $("pageSub").textContent=pageInfo[id][1];
+ if(id==="model")loadModel();
+}
+document.querySelectorAll("nav button").forEach(b=>b.addEventListener("click",()=>showPage(b.dataset.page)));
+document.querySelectorAll("[data-go]").forEach(b=>b.addEventListener("click",()=>showPage(b.dataset.go)));
+async function api(path, options={}){
+ const r=await fetch("/api"+path,options);
+ const text=await r.text();let data;
+ try{data=JSON.parse(text)}catch{data={error:text||"Unexpected response"}}
+ if(!r.ok)throw new Error(data.error||("HTTP "+r.status));
+ return data;
+}
+function pretty(id,data){$(id).textContent=JSON.stringify(data,null,2)}
+function opts(method,body,token){
+ const headers={"Content-Type":"application/json"};
+ if(token)headers["X-Reviewer-Token"]=token;
+ return {method,headers,body:body===undefined?undefined:JSON.stringify(body)};
+}
+
+function renderOverview(h,s){
+ const root=$("homeResult");
+ const raw={health:h,stats:s};
+ const item=(label,value)=>'<div class="overview-item"><div class="overview-label">'+esc(label)+'</div><div class="overview-value">'+esc(value??"Not provided")+'</div></div>';
+ const details=[
+  ["Runtime architecture",h.architecture||h.machine||h.runtime_architecture||(h.runtime&&h.runtime.machine)||"Not provided"],
+  ["Operating system",h.system||h.platform||(h.runtime&&h.runtime.system)||"Not provided"],
+  ["Dataset source",h.dataset_source||"Not provided"],
+  ["Recorded inferences",s.inference_count??0],
+  ["Model version",h.model_version||"Not provided"]
+ ];
+ root.innerHTML='<div class="overview-report">'+
+  '<div class="overview-status"><span class="overview-status-dot"></span><div><strong>API connected</strong><div class="overview-label">Health check succeeded; system status retrieved from the LinuxONE-hosted service.</div></div></div>'+
+  '<div class="overview-grid">'+details.map(x=>item(x[0],x[1])).join("")+'</div>'+
+  '<details><summary>View raw API response</summary><pre class="overview-raw">'+esc(JSON.stringify(raw,null,2))+'</pre></details>'+
+ '</div>';
+}
+function renderOverviewError(message){
+ const root=$("homeResult");
+ root.innerHTML='<div class="overview-report"><div class="overview-status offline"><span class="overview-status-dot"></span><div><strong>API unavailable</strong><div class="overview-label">'+esc(message)+'</div></div></div></div>';
+}
+
+async function refreshHealth(){
+ try{
+  const h=await api("/health"),s=await api("/stats");
+  $("healthDot").className="dot ok";$("healthText").textContent="API online";
+  $("metricHealth").textContent="Online";$("modelHealth").textContent="Online";
+  $("metricModel").textContent=h.model_version||"Loaded";$("modelVersion").textContent=h.model_version||"Loaded";
+  $("metricCount").textContent=s.inference_count??0;
+  renderOverview(h,s);
+ }catch(e){
+  $("healthDot").className="dot";$("healthText").textContent="API unavailable";
+  $("metricHealth").textContent="Offline";pretty("homeResult",{error:e.message});
+ }
+}
+function renderModelReport(d){
+ const root=$("modelResult");
+ if(!d||d.error){
+  root.innerHTML='<div class="reviewer-report"><div class="reviewer-banner bad"><strong>Model details unavailable</strong><p>'+esc(d&&d.error||"The API did not return model details.")+'</p></div></div>';
+  return;
+ }
+ const m=d.metrics||{}, lr=m.models&&m.models.logistic_regression&&m.models.logistic_regression.test||{};
+ const fmt=(v,digits=1)=>Number.isFinite(Number(v))?(Number(v)*100).toFixed(digits)+"%":"Not available";
+ const num=(v,digits=3)=>Number.isFinite(Number(v))?Number(v).toFixed(digits):"Not available";
+ const card=(label,value,help)=>'<div class="reviewer-item"><div class="reviewer-label">'+esc(label)+'</div><div class="reviewer-value">'+esc(String(value))+'</div>'+(help?'<div class="reviewer-label">'+esc(help)+'</div>':'')+'</div>';
+ const raw='<details><summary>View technical details (raw API response)</summary><pre class="reviewer-raw">'+esc(JSON.stringify(d,null,2))+'</pre></details>';
+ const cm=lr.confusion_matrix||{};
+ let html='<div class="reviewer-report">';
+ html+='<div class="reviewer-banner warn"><strong>Prototype model — not a lending decision</strong><p>This model estimates patterns associated with historical credit-risk labels. It has not been validated for real borrowers or Indian lending.</p></div>';
+ html+='<h4>What is running?</h4><div class="reviewer-grid">'+
+  card("Model type","Logistic Regression","Statistical model that estimates risk from application features")+
+  card("Model version",d.model_version||"Not provided")+
+  card("Training dataset","German Credit (UCI)","1,000 historical records")+
+  card("Test records",m.n_test??"Not available","Records held out for evaluation")+
+  card("Runtime",((d.runtime||{}).machine||"Unknown")+" · "+((d.runtime||{}).system||"Unknown"))+
+  card("Trained at",d.trained_at||"Not provided")+'</div>';
+ html+='<h4>How did it perform on the test data?</h4><p>These figures describe this dataset and test split only. They do not predict how accurately the model will work for new populations.</p><div class="reviewer-grid">'+
+  card("Accuracy",fmt(lr.accuracy),"Share of test records classified correctly at the chosen threshold")+
+  card("Recall for higher-risk labels",fmt(lr.recall),"Found 80% of records labelled higher risk; some were still missed")+
+  card("Precision for higher-risk labels",fmt(lr.precision),"Of records flagged, about 45% had the higher-risk label")+
+  card("ROC-AUC",num(lr.roc_auc),"Measures how well the model ranks the two label groups across thresholds")+
+  card("Evaluation sample",m.n_test??"Not available","Held-out records; only 200 in this evaluation")+
+  card("Decision threshold",num(lr.threshold,2),"Classification cutoff, not a 23% default probability or a lending decision")+
+  '</div>';
+ html+='<div class="reviewer-banner warn"><strong>What this means in practice</strong><p>On the test set, the model caught many higher-risk-labelled records, but also flagged many records that did not have that label. A flagged result should never be treated as proof that a person will fail to repay.</p></div>';
+ html+='<h4>Evaluation counts</h4><div class="reviewer-grid">'+
+  card("Correctly not flagged",cm.tn??"Not available")+
+  card("Flagged but label was not higher risk",cm.fp??"Not available")+
+  card("Higher-risk labels missed",cm.fn??"Not available")+
+  card("Higher-risk labels identified",cm.tp??"Not available")+'</div>';
+ html+='<h4>Limitations and responsible use</h4><ul>'+
+  '<li>The dataset is small, old, and not representative of Indian lending.</li>'+
+  '<li>Accuracy and other metrics can change with different data, populations, or thresholds.</li>'+
+  '<li>Age-group error-rate comparisons are an audit signal, not proof of fairness.</li>'+
+  '<li>Independent validation, calibration, bias review, privacy safeguards, and legal review are required before real-world use.</li>'+
+  '</ul><p>Use only synthetic or demo data in this prototype. Do not enter real customer personal or financial information.</p>';
+ html+=raw+'</div>';
+ root.innerHTML=html;
+}
+async function loadModel(){
+ try{
+  const d=await api("/model");
+  renderModelReport(d);
+  $("modelVersion").textContent=d.model_version||"—";
+  $("modelHealth").textContent="Online";
+ }catch(e){
+  renderModelReport({error:e.message});
+  $("modelHealth").textContent="Unavailable";
+ }
+}
+$("refresh").onclick=refreshHealth;$("refreshModel").onclick=loadModel;
+
+function renderAssessment(d){
+ const root=$("assessResult");
+ if(!d || d.status!=="assessed" || !d.risk || !d.affordability){
+  root.textContent=JSON.stringify(d,null,2);
+  return;
+ }
+ const r=d.risk, a=d.affordability, ex=d.explanation||{};
+ const app=d.application||{};
+ const contributions=Array.isArray(ex.contributions)?ex.contributions:[];
+ const visibleContributions=contributions.slice(0,5);
+ const contributionHtml=visibleContributions.length
+  ?'<ul class="risk-factor-list">'+visibleContributions.map(c=>{
+    if(typeof c==="string") return '<li>'+esc(c)+'</li>';
+    const name=c.label||c.feature||c.name||"Factor";
+    const value=c.value;
+    const direction=c.direction==="raises_risk"
+      ?"Increased the model estimate"
+      :c.direction==="lowers_risk"
+       ?"Reduced the model estimate"
+       :"Contribution direction not provided";
+    return '<li><strong>'+esc(name)+'</strong> '+
+      (value!==undefined?' <span class="assess-sub">('+esc(value)+')</span>':"")+
+      '<div class="assess-sub">'+direction+'</div></li>';
+   }).join("")+'</ul>'
+  :'<p>No individual factor details were returned for this assessment.</p>';
+ const plain="These are the five factors that contributed most to this model estimate for this application. They show how the model responded to the information provided; they do not prove what causes repayment outcomes. Factors can be related to one another.";
+ const riskValue=Number(r.probability);
+ const riskPct=Number.isFinite(riskValue)?(riskValue*100).toFixed(2)+"%":"—";
+ const riskBand=r.band_label||r.band||"Not provided";
+ const fields=[
+  ["New loan EMI",money(a.new_emi)],
+  ["Existing monthly EMI",money(a.existing_emi)],
+  ["Total monthly EMI",money(a.total_emi)],
+  ["Income after EMIs",money(a.income_after_emis)],
+  ["Combined EMI / income",pct(a.combined_emi_ratio)],
+  ["Existing EMI / income",pct(a.existing_emi_ratio)],
+  ["Estimated total interest",money(a.total_interest)]
+ ];
+ root.innerHTML=
+  '<div class="assess-report">'+
+   '<div class="assess-cards">'+
+    '<div class="assess-card"><div class="assess-label">Estimated likelihood of the historical higher-risk label</div><div class="assess-value">'+esc(riskPct)+'</div><div class="assess-sub">'+esc(riskBand)+'</div></div>'+
+    '<div class="assess-card"><div class="assess-label">Assessment status</div><div class="assess-value" style="font-size:20px">Complete</div><div class="assess-sub">Application ID: '+esc(d.app_id||"—")+'</div></div>'+
+   '</div>'+
+   '<h4>Affordability summary</h4><div class="assess-table-wrap"><table class="assess-table"><thead><tr><th>Metric</th><th>Value</th></tr></thead><tbody>'+
+   fields.map(x=>'<tr><td>'+esc(x[0])+'</td><td>'+esc(x[1])+'</td></tr>').join("")+
+   '</tbody></table></div>'+
+   '<h4>What influenced the estimate?</h4><div class="assess-explanation"><p>'+esc(plain)+'</p><p class="assess-sub">Values shown below use categories from the historical German Credit dataset. Monetary categories are in the original dataset units, not Indian rupees.</p>'+contributionHtml+'</div>'+
+   '<div class="assess-sub" style="margin-top:14px">Prototype only: this is an estimate of a historical dataset label, not a verified probability of default for an individual. The model has not been validated for Indian lending. It is not a credit score, approval, rejection, or lending recommendation. Affordability calculations and ML features may be separate.</div>'+
+   '<details><summary>View raw API response</summary><pre class="assess-raw">'+esc(JSON.stringify(d,null,2))+'</pre></details>'+
+  '</div>';
+}
+
+$("assessForm").addEventListener("submit",async e=>{
+ e.preventDefault();$("assessResult").textContent="Assessing…";$("assessSummary").textContent="Request in progress.";
+ const app={};new FormData(e.target).forEach((v,k)=>{app[k]=Number(v)});
+ for(const f of ["checking_status","credit_history","savings_status","employment_since","housing","property"])app[f]=e.target.elements[f].value;
+ try{
+  const d=await api("/assess",opts("POST",{application:app}));
+  renderAssessment(d);
+  if(d.app_id)$("whatifId").value=d.app_id;
+  if(d.app_id)$("historyId").value=d.app_id;
+  $("assessSummary").textContent=d.status==="assessed"
+   ?`Assessment complete · historical-label estimate ${(d.risk.probability*100).toFixed(1)}% · ID ${d.app_id}`
+   :`Status: ${d.status||"unknown"} · inspect validation/review details below`;
+  refreshHealth();
+ }catch(err){$("assessSummary").textContent="Request failed";pretty("assessResult",{error:err.message})}
+});
+function money(v){
+ const n=Number(v);
+ return Number.isFinite(n)?"₹"+n.toLocaleString("en-IN",{minimumFractionDigits:2,maximumFractionDigits:2}):"—";
+}
+function pct(v){
+ const n=Number(v);
+ return Number.isFinite(n)?(n*100).toFixed(2)+"%":"—";
+}
+function esc(v){
+ return String(v??"—").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+}
+function renderWhatif(d,field,val){
+ const root=$("whatifResult");
+ if(!d||!d.original||!d.modified){
+  root.textContent=JSON.stringify(d,null,2);
+  return;
+ }
+ const o=d.original,m=d.modified;
+ const oa=o.affordability||{},ma=m.affordability||{};
+ const or=o.risk||{},mr=m.risk||{};
+ const app=o.application||{},mapp=m.application||{};
+ const labels={monthly_income:"Monthly income",existing_emi:"Existing EMI",loan_inr:"Requested loan",rate_pct:"Interest rate",tenure_months:"Tenure",duration_months:"Loan duration (dataset units)",credit_amount:"Credit amount (dataset units)"};
+ const changedLabel=labels[field]||field;
+ const changedValue=["monthly_income","existing_emi","loan_inr"].includes(field)?money(val):String(val)+(field==="rate_pct"?"%":"");
+ const delta=Number(d.delta_probability);
+ const riskChange=Number.isFinite(delta)?(Math.abs(delta)<1e-7?"No change in ML estimate":(delta>0?"Increased by ":"Decreased by ")+pct(Math.abs(delta))):"Not provided";
+ const rows=[
+  ["New loan EMI",money(oa.new_emi),money(ma.new_emi)],
+  ["Existing EMI",money(app.existing_emi),money(mapp.existing_emi)],
+  ["Total monthly EMI",money(oa.total_emi),money(ma.total_emi)],
+  ["Income after EMIs",money(oa.income_after_emis),money(ma.income_after_emis)],
+  ["Combined EMI / income",pct(oa.combined_emi_ratio),pct(ma.combined_emi_ratio)],
+  ["Estimated total interest",money(oa.total_interest),money(ma.total_interest)]
+ ];
+ let html=`<div class="whatif-report">
+ <p><strong>Hypothetical scenario only:</strong> ${esc(changedLabel)} changed to ${esc(changedValue)}. The official saved assessment is unchanged.</p>
+ <div class="whatif-grid">
+ <div class="whatif-card"><div class="whatif-label">Original ML estimate</div><div class="whatif-value">${pct(or.probability)}</div><div>${esc(or.band_label||or.band||"Unavailable")}</div></div>
+ <div class="whatif-card"><div class="whatif-label">Hypothetical ML estimate</div><div class="whatif-value">${pct(mr.probability)}</div><div>${esc(mr.band_label||mr.band||"Unavailable")}</div></div>
+ </div>
+ <p><strong>ML estimate change:</strong> ${esc(riskChange)}</p>
+ <h4>Affordability comparison</h4>
+ <div class="whatif-table-wrap"><table class="whatif-table"><thead><tr><th>Metric</th><th>Original</th><th>Hypothetical</th></tr></thead><tbody>
+ ${rows.map(r=>`<tr><td>${esc(r[0])}</td><td>${esc(r[1])}</td><td>${esc(r[2])}</td></tr>`).join("")}
+ </tbody></table></div>`;
+ const sweep=Array.isArray(d.tenure_sweep)?d.tenure_sweep:[];
+ if(sweep.length){
+  html+=`<h4>Tenure comparison</h4><p>Longer tenures can reduce monthly EMI while increasing total interest.</p>
+  <div class="whatif-table-wrap"><table class="whatif-table"><thead><tr><th>Tenure</th><th>New EMI</th><th>Combined EMI / income</th><th>Total interest</th></tr></thead><tbody>
+  ${sweep.map(t=>`<tr><td>${esc(t.tenure_months)} months</td><td>${esc(money(t.new_emi))}</td><td>${esc(pct(t.combined_emi_ratio))}</td><td>${esc(money(t.total_interest))}</td></tr>`).join("")}
+  </tbody></table></div>`;
+ }
+ html+=`<p class="whatif-disclaimer"><strong>Prototype limitation:</strong> This model uses public/demo data and is not validated for real lending. INR affordability inputs and dataset-specific ML features are separate; affordability can change while the ML estimate stays the same.</p>
+ <details><summary>View raw API response</summary><pre class="whatif-raw">${esc(JSON.stringify(d,null,2))}</pre></details></div>`;
+ root.innerHTML=html;
+}
+$("runWhatif").onclick=async()=>{
+ try{
+  const id=$("whatifId").value.trim(),field=$("whatifField").value,val=Number($("whatifValue").value);
+  if(!id)throw new Error("Enter an application ID first.");
+  if(!Number.isFinite(val))throw new Error("Enter a valid numeric value.");
+  const h=await api("/history/"+encodeURIComponent(id));
+  if(!h.official_record)throw new Error("Application not found in history.");
+  const d=await api("/whatif",opts("POST",{application:h.official_record,overrides:{[field]:val}}));
+  renderWhatif(d,field,val);
+ }catch(e){pretty("whatifResult",{error:e.message})}
+};
+
+function renderHistory(d){
+ const root=$("historyResult");
+ const record=d&&(d.official_record||d.record||d.assessment);
+ const snapshots=Array.isArray(d&&d.snapshots)?d.snapshots:[];
+ const snap=[...snapshots].sort((a,b)=>String(b.ts||"").localeCompare(String(a.ts||"")))[0]||null;
+ if(!record){
+  root.innerHTML='<div class="history-report"><p>No saved application record was returned.</p><details><summary>View raw API response</summary><pre class="history-raw">'+esc(JSON.stringify(d,null,2))+'</pre></details></div>';
+  return;
+ }
+ const id=d.app_id||record.app_id||$("historyId").value.trim();
+ const probability=snap&&Number(snap.probability);
+ const riskText=Number.isFinite(probability)?(probability*100).toFixed(2)+"%":"Not available";
+ const band=snap?(snap.band||"Not provided"):"No saved snapshot";
+ const date=snap&&snap.ts?snap.ts.replace("T"," ").replace("Z"," UTC"):"Not provided";
+ const corrections=Array.isArray(d.corrections)?d.corrections:[];
+ const fields=[
+  ["Age",record.age],
+  ["Checking status",record.checking_status],
+  ["Credit amount (dataset units)",record.credit_amount],
+  ["Credit history",record.credit_history],
+  ["Duration (dataset units)",record.duration_months],
+  ["Employment duration",record.employment_since],
+  ["Existing credits",record.existing_credits],
+  ["Housing",record.housing],
+  ["Installment rate",record.installment_rate],
+  ["Monthly income (INR)",record.monthly_income==null?"—":money(record.monthly_income)],
+  ["Existing EMI (INR)",record.existing_emi==null?"—":money(record.existing_emi)],
+  ["Requested loan (INR)",record.loan_inr==null?"—":money(record.loan_inr)],
+  ["Interest rate",record.rate_pct==null?"—":String(record.rate_pct)+"%"],
+  ["Tenure",record.tenure_months==null?"—":String(record.tenure_months)+" months"],
+  ["Property",record.property],
+  ["Savings status",record.savings_status]
+ ];
+ const correctionHtml=corrections.length
+  ?'<ul>'+corrections.map(c=>'<li>'+esc(c.status||"Correction request")+(c.reason?' — '+esc(c.reason):"")+'</li>').join("")+'</ul>'
+  :'<p class="history-label">No correction requests recorded.</p>';
+ const snapshotHtml=snap
+  ?'<div class="history-table-wrap"><table class="history-table"><tbody>'+
+   '<tr><td>Snapshot ID</td><td>'+esc(snap.snapshot_id)+'</td></tr>'+
+   '<tr><td>Snapshot type</td><td>'+esc(snap.kind)+'</td></tr>'+
+   '<tr><td>Application version</td><td>'+esc(snap.app_version)+'</td></tr>'+
+   '<tr><td>Model version</td><td>'+esc(snap.model_version)+'</td></tr>'+
+   '<tr><td>Assessment latency</td><td>'+esc(snap.latency_ms==null?"—":snap.latency_ms+" ms")+'</td></tr>'+
+   '</tbody></table></div>'
+  :'<p>No saved assessment snapshot was returned.</p>';
+ root.innerHTML=
+  '<div class="history-report">'+
+   '<div class="history-cards">'+
+    '<div class="history-card"><div class="history-label">Application ID</div><div class="history-value">'+esc(id)+'</div><div class="history-label">Saved assessment date: '+esc(date)+'</div></div>'+
+    '<div class="history-card"><div class="history-label">Saved ML estimate</div><div class="history-value">'+esc(riskText)+'</div><div class="history-label">Risk band: '+esc(band)+'</div></div>'+
+   '</div>'+
+   '<h4>Saved snapshot details</h4>'+snapshotHtml+
+   '<h4>Saved application inputs</h4>'+
+   '<div class="history-table-wrap"><table class="history-table"><thead><tr><th>Field</th><th>Saved value</th></tr></thead><tbody>'+
+   fields.map(x=>'<tr><td>'+esc(x[0])+'</td><td>'+esc(x[1])+'</td></tr>').join("")+
+   '</tbody></table></div>'+
+   '<h4>Affordability</h4><p>EMI and total-interest calculations are not included in this history response. Open the original assessment result to view them.</p>'+
+   '<h4>Correction requests</h4>'+correctionHtml+
+   '<p class="history-label">This page displays the saved snapshot; viewing it does not change the official record.</p>'+
+   '<details><summary>View raw API response</summary><pre class="history-raw">'+esc(JSON.stringify(d,null,2))+'</pre></details>'+
+  '</div>';
+}
+$("loadHistory").onclick=async()=>{
+ try{const id=$("historyId").value.trim();if(!id)throw new Error("Enter an application ID.");renderHistory(await api("/history/"+encodeURIComponent(id)))}
+ catch(e){pretty("historyResult",{error:e.message})}
+};
+
+function renderReviewer(d,mode){
+ const root=$("reviewResult");
+ const val=v=>v===null||v===undefined||v===""?"—":
+   typeof v==="object"?JSON.stringify(v):String(v);
+ const raw='<details><summary>View technical details (raw API response)</summary><pre class="reviewer-raw">'+esc(JSON.stringify(d,null,2))+'</pre></details>';
+ const card=(label,value)=>'<div class="reviewer-item"><div class="reviewer-label">'+esc(label)+'</div><div class="reviewer-value">'+esc(val(value))+'</div></div>';
+ const table=(title,rows,fields)=>{
+  if(!rows.length)return '<p>No records to display.</p>';
+  return '<h4>'+esc(title)+' ('+rows.length+')</h4><div class="reviewer-table-wrap"><table class="reviewer-table"><thead><tr>'+
+   fields.map(f=>'<th>'+esc(f[1])+'</th>').join('')+
+   '</tr></thead><tbody>'+rows.map(r=>'<tr>'+fields.map(f=>'<td>'+esc(val(r&&r[f[0]]))+'</td>').join('')+'</tr>').join('')+
+   '</tbody></table></div>';
+ };
+ if(d&&d.error){
+  root.innerHTML='<div class="reviewer-report"><div class="reviewer-banner bad"><strong>Request failed</strong><p>'+esc(d.error)+'</p><p>Check your reviewer token and whether the service is running.</p></div>'+raw+'</div>';
+  return;
+ }
+ let title="Reviewer results",message="The server returned a response.",cls="";
+ let body="";
+ if(mode==="pending"){
+  title="Corrections waiting for review";
+  const rows=Array.isArray(d)?d:(d&&Array.isArray(d.pending)?d.pending:[]);
+  if(rows.length){
+   message=rows.length+" correction(s) need attention.";
+   cls="warn";
+   body=table("Waiting for review",rows,[
+    ["correction_id","Correction ID"],["app_id","Application ID"],
+    ["field","Field to correct"],["old_value","Current value"],
+    ["claimed_value","Requested value"],["reason","Reason"],
+    ["submitted_ts","Submitted"]
+   ]);
+   body+='<p>To review one, enter its Correction ID below, choose Verify or Reject, and record a clear reason.</p>';
+  }else{
+   message="No pending corrections were returned.";
+   cls="good";
+   body="<p>There are no correction requests waiting in the returned list.</p>";
+  }
+ }else if(mode==="verify"){
+  title="Audit integrity check";
+  if(d&&d.valid===true){
+   message="Audit integrity verified.";
+   cls="good";
+   body='<div class="reviewer-grid">'+card("Verification","Passed")+card("Audit entries checked",d.entries)+
+    card("Problem entry","None detected")+'</div><p>The stored audit entries passed the hash-chain check performed by the server.</p>';
+  }else if(d&&d.valid===false){
+   message="Audit integrity check failed.";
+   cls="bad";
+   body='<div class="reviewer-grid">'+card("Verification","Failed")+card("Audit entries checked",d.entries)+
+    card("First problematic entry",d.first_bad_id)+'</div><p>Do not treat the audit chain as verified. Investigate the indicated entry and surrounding records.</p>';
+  }else{
+   message="Verification status is unclear.";
+   cls="warn";
+   body="<p>The response did not include a clear true/false verification result. Check the technical details before drawing a conclusion.</p>";
+  }
+ }else if(mode==="audit"){
+  title="Audit activity";
+  const rows=Array.isArray(d)?d:(d&&Array.isArray(d.events)?d.events:
+   d&&Array.isArray(d.records)?d.records:[]);
+  message=rows.length?rows.length+" audit event(s) returned.":"No audit events were returned.";
+  cls=rows.length?"":"warn";
+  body=rows.length?table("Recent activity",rows,[
+   ["ts","Time"],["event_type","Activity"],["actor","Performed by"],
+   ["subject","Related application"],["id","Event ID"]
+  ]):"<p>There are no audit events in this response.</p>";
+  body+='<p>Audit activity records what the system reports happened. Use “Verify audit chain” separately to check integrity.</p>';
+ }else if(mode==="submit"){
+  title="Review decision";
+  const outcome=String(d&&d.outcome||d&&d.status||"").toLowerCase();
+  if(outcome==="verified"||outcome==="rejected"){
+   message=outcome==="verified"?"Correction verified and processed.":"Correction rejected.";
+   cls=outcome==="verified"?"good":"warn";
+  }else{
+   message="A response was received; confirm the result below.";
+   cls="warn";
+  }
+  body='<div class="reviewer-grid">'+card("Outcome",d&&d.outcome||d&&d.status)+
+   card("Correction ID",d&&d.correction_id)+card("Application ID",d&&d.app_id)+
+   card("New application version",d&&d.app_version)+card("New snapshot ID",d&&d.snapshot_id)+'</div>'+
+   '<p>Check the outcome and application details before assuming a correction changed the official record.</p>';
+ }else{
+  const obj=d&&typeof d==="object"?d:{value:d};
+  body='<div class="reviewer-grid">'+Object.keys(obj).filter(k=>k!=="token"&&k!=="reviewer_token").map(k=>card(k.replace(/_/g," "),obj[k])).join("")+'</div>';
+ }
+ root.innerHTML='<div class="reviewer-report"><h3>'+esc(title)+'</h3><div class="reviewer-banner '+cls+'"><strong>'+esc(message)+'</strong></div>'+body+raw+'</div>';
+}
+function reviewerOpts(body){return opts("POST",body,$("reviewToken").value)}
+$("loadPending").onclick=async()=>{
+ try{renderReviewer(await api("/pending",opts("GET",undefined,$("reviewToken").value)),"pending")}
+ catch(e){renderReviewer({error:e.message},"error")}
+};
+$("loadAudit").onclick=async()=>{
+ try{renderReviewer(await api("/audit?limit=100",opts("GET",undefined,$("reviewToken").value)),"audit")}
+ catch(e){renderReviewer({error:e.message},"error")}
+};
+$("verifyAudit").onclick=async()=>{
+ try{renderReviewer(await api("/audit/verify",opts("GET",undefined,$("reviewToken").value)),"verify")}
+ catch(e){renderReviewer({error:e.message},"error")}
+};
+$("submitReview").onclick=async()=>{
+ try{
+  const id=Number($("correctionId").value);if(!Number.isInteger(id)||id<1)throw new Error("Enter a valid correction ID.");
+  const body={decision:$("reviewDecision").value,reviewer:$("reviewerName").value.trim()||"reviewer",note:$("reviewNote").value};
+  renderReviewer(await api("/corrections/"+id+"/review",reviewerOpts(body)),"submit");
+ }catch(e){renderReviewer({error:e.message},"error")}
+};
+refreshHealth();
+</script>
+</body>
+</html>

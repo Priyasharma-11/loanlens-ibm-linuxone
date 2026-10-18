@@ -1,0 +1,12 @@
+# Submission checklist
+- [ ] Trained ON LinuxONE; `uname -m` = s390x screenshot
+- [ ] `setup_linuxone.sh` tests OK screenshot; `evidence/linuxone_evidence.json` saved
+- [ ] `api_smoke.sh` + `/audit` screenshots (VALIDATION_FAILED, ASSESSED, CORRECTION_SUBMITTED, CORRECTION_VERIFIED)
+- [ ] UI run with s390x banner; dataset banner correct (german_credit_uci vs synthetic)
+- [ ] `artifacts/metrics.json` numbers copied into slides (state dataset + limitations)
+- [ ] Demo video ≤ 3:00 (docs/DEMO_SCRIPT.md)
+- [ ] Pitch PDF (problem → workflow → architecture → LinuxONE evidence → metrics → limitations → next steps)
+- [ ] Repo/ZIP: remove `artifacts/`, `.venv/`; keep README, docs, tests
+- [ ] Open-source resources listed: scikit-learn, pandas, numpy, joblib, Streamlit (UI), UCI German Credit (CC BY 4.0), optional SHAP
+- [ ] Code authored during the event window (follow organiser rules; this scaffold must be reviewed/understood by the team)
+- [ ] Every team member can explain: target choice, two engines, why LR, audit design, what is NOT claimed

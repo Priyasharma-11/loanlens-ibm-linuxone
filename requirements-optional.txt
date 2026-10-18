@@ -1,0 +1,1 @@
+shap          # optional cross-check of the built-in exact explanations (python -c "from loanlens.explain import shap_crosscheck")
