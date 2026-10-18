@@ -62,5 +62,5 @@ Restart the server, `POST /assess` → `invalid_input`, then `GET /audit` → ne
 
 ## Honest status of this build
 * ✅ Tested here: model training/evaluation, validation, explanations (additivity), what-if constraints, correction workflow, audit chain + tamper detection, HTTP API incl. token enforcement — 17 unit/integration tests passing (on x86_64, Python 3.12, scikit-learn 1.8).
-* ✅ Verified on IBM LinuxONE (`s390x`): the API health endpoint, dashboard connection to the API, and a sample assessment work. The full automated test suite still needs to be rerun on this VM before submission.
+* ✅ Verified on IBM LinuxONE (`s390x`, Python 3.12.3, scikit-learn 1.4.1.post1): API health, dashboard-to-API connection, a sample assessment, and all 17 automated tests passed. Two API tests emitted non-fatal `ResourceWarning` messages about unclosed test sockets.
 * Metrics in `artifacts/metrics.json` come from whichever dataset *you* train on; synthetic-data numbers are not evidence of real-world performance.
